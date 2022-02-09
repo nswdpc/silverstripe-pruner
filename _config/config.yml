@@ -1,0 +1,5 @@
+---
+Name: nswdpc-pruner
+---
+NSWDPC\Pruner\Pruner:
+  target_models: []
