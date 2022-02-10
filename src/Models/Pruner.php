@@ -70,6 +70,7 @@ class Pruner
             'keys' => [],
             'file_keys' => [],
             'report_file_keys' => [],
+            'report_only' => $report_only
         ];
 
         if (empty($targets)) {
