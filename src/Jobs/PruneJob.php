@@ -5,6 +5,7 @@ namespace NSWDPC\Pruner;
 use Symbiote\QueuedJobs\Services\AbstractQueuedJob;
 use Symbiote\QueuedJobs\Services\QueuedJobService;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Config\Configurable;
 
 /**
  * QueuedJob to process pruning based on input.
@@ -13,11 +14,14 @@ use SilverStripe\Core\Config\Config;
  */
 class PruneJob extends AbstractQueuedJob
 {
+
+    use Configurable;
+
     /**
      * @var int|float
      */
     private static $repeat_hours = 1;// hours
-    
+
     /**
      * @var int|float
      */
@@ -35,18 +39,17 @@ class PruneJob extends AbstractQueuedJob
      * @param boolean $report_only when true, results returned show what would have been done
      *
      */
-    public function __construct($days_ago = 30, $limit = 50, $targets = "", $report_only = false)
+    public function __construct(float $days_ago = 30, int $limit = 50, $targets = "", $report_only = false)
     {
-        $days_ago = (int)$days_ago;
-        if (!$days_ago || $days_ago <=0) {
-            $this->days_ago = self::$default_days_ago;
+
+        if (!$days_ago || $days_ago <= 0) {
+            $this->days_ago = self::config()->get('default_days_ago');
         } else {
             $this->days_ago = $days_ago;
         }
 
-        $limit = (int)$limit;
         if (!$limit || $limit <= 0) {
-            $this->limit = self::$default_limit;
+            $this->limit = self::config()->get('default_limit');
         } else {
             $this->limit = $limit;
         }
@@ -94,12 +97,19 @@ class PruneJob extends AbstractQueuedJob
 
     /**
      * Get the next job start DateTime, formatted
+     * If there is no repeat_hours value configure the job does not automatically repeat
      * @return string
      */
-    public function getNextStartDateTime()
+    public function getNextStartDateTime() : string
     {
-        $dt = new \DateTime('now +' . self::$repeat_hours . ' hours');
-        return $dt->format('Y-m-d H:i:s');
+        $hours = self::config()->get('repeat_hours');
+        if(!$hours || $hours <= 0) {
+            return '';
+        } else {
+            $dt = new \DateTime();
+            $dt->modify('+' . $hours . ' hours');
+            return $dt->format('Y-m-d H:i:s');
+        }
     }
 
     /**
@@ -107,7 +117,9 @@ class PruneJob extends AbstractQueuedJob
      */
     public function afterComplete()
     {
-        $job = new PruneJob($this->days_ago, $this->limit, $this->targets, $this->report_only);
-        singleton(QueuedJobService::class)->queueJob($job, $this->getNextStartDateTime());
+        if($nextStartDateTime = $this->getNextStartDateTime()) {
+            $job = new PruneJob($this->days_ago, $this->limit, $this->targets, $this->report_only);
+            singleton(QueuedJobService::class)->queueJob($job, $nextStartDateTime);
+        }
     }
 }
