@@ -113,6 +113,14 @@ class Pruner
                     throw new InvalidModelListException("{$model} did not return an ArrayList || DataList - got a " . get_class($list));
                 }
 
+                // restrict DataList dataClass to the class of  model instance
+                if($list instanceof DataList) {
+                    $dataClass = $list->dataClass();
+                    if(!($instance instanceof $dataClass) ) {
+                        throw new InvalidModelListException("Singleton instance of '{$model}' should be an instance of '{$dataClass}'");
+                    }
+                }
+
                 $list_count = $list->count();
                 if ($list_count == 0) {
                     Logger::log("Pruner::prune {$model}::pruneList() has no matching records.. this might be expected.", Logger::INFO);
