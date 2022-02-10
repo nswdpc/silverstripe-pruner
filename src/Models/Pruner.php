@@ -20,7 +20,7 @@ use SilverStripe\Core\Injector\Injector;
 class Pruner
 {
     use Configurable;
-    
+
     use Injectable;
 
     private static $target_models = [];// an array of all models that will be pruned
@@ -38,32 +38,16 @@ class Pruner
             if (!class_exists($model)) {
                 throw new \Exception("Class: '{$model}' is not loaded or does not exist");
             }
-            
+
             $instance = Injector::inst()->create($model);
             if (!($instance instanceof DataObject)) {
                 throw new \Exception("{$model} is not an instance of DataObject");
             }
 
-            // Check whether the model can be pruned
-            $implements = $this->implementsPrunerInterface($instance);
-
-            if (!$implements) {
-                // check whether an extension implements the Interface
-                $extensions = $instance->getExtensionInstances();
-                foreach ($extensions as $extension_class => $extension_instance) {
-                    $implements = $this->implementsPrunerInterface($extension_instance);
-                    if ($implements) {
-                        // huzzah
-                        break;
-                    }
-                }
-            }
-
-            // Incorporated with extension checks
-            if (!$implements) {
+            if (!self::recordIsPruneable($instance)) {
                 throw new \Exception("Neither {$model} nor its extensions implement PrunerInterface");
             }
-            
+
             return $instance;
         } catch (\Exception $e) {
             throw new InvalidModelException($e->getMessage());
@@ -169,21 +153,42 @@ class Pruner
     }
 
     /**
+     * Determine whether the passed instance can be pruned
+     * @param DataObject an instance to test whether it implement or an extension implements PrunerInterface
+     * @return bool
+     */
+    public static function recordIsPruneable(DataObject $instance) : bool {
+        $implements = self::implementsPrunerInterface($instance);
+        if (!$implements) {
+            // check whether an extension implements the Interface
+            $extensions = $instance->getExtensionInstances();
+            foreach ($extensions as $extension_class => $extension_instance) {
+                $implements = self::implementsPrunerInterface($extension_instance);
+                if ($implements) {
+                    // huzzah
+                    break;
+                }
+            }
+        }
+        return $implements;
+    }
+
+    /**
      * Determine whether an instance implements {@link \NSWDPC\Pruner\PrunerInterface}
      */
-    protected function implementsPrunerInterface(object $instance) : bool
+    protected static function implementsPrunerInterface(object $instance) : bool
     {
         $rc = new \ReflectionClass($instance);
-        return $rc->implementsPrunerInterface(PrunerInterface::class);
+        return $rc->implementsInterface(PrunerInterface::class);
     }
 
     /**
      * Prune the passed record implementing PrunerInterface
-     * @param PrunerInterface $record
+     * @param DataObject implementing PrunerInterface
      * @throws Exception
      * @return bool
      */
-    protected function pruneRecord(PrunerInterface $record) : bool
+    protected function pruneRecord(DataObject $record) : bool
     {
         // The record should delete itself in prune(), if it can, along with all associations
         $record->onBeforePrune();
@@ -197,8 +202,9 @@ class Pruner
      *  content: base64_encoded file content
      *  content-type: the content type of the file
      *  name: the name of the file
+     * @param DataObject implementing PrunerInterface
      */
-    private function getRecordFiles(PrunerInterface $record)
+    private function getRecordFiles(DataObject $record)
     {
         return $record->pruneFilesList();
     }
