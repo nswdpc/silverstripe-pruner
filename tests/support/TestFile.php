@@ -17,6 +17,6 @@ class TestFile extends File implements TestOnly
     * @var array
     */
     private static $has_one = [
-        'TestRecord' => TestWithFile::class,
+        'Record' => TestRecordWithFile::class,
     ];
 }

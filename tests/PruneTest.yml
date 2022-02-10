@@ -1,0 +1,40 @@
+NSWDPC\Pruner\Tests\TestRecord:
+  ancient:
+    Title: 'ancient'
+    ExpectedToBeDeleted: 1
+  future:
+    Title: 'future'
+    ExpectedToBeDeleted: 0
+  delete-1:
+    Title: 'delete-1'
+    ExpectedToBeDeleted: 1
+  delete-2:
+    Title: 'delete-2'
+    ExpectedToBeDeleted: 1
+  delete-3:
+    Title: 'delete-3'
+    ExpectedToBeDeleted: 1
+  delete-4:
+    Title: 'delete-4'
+    ExpectedToBeDeleted: 1
+  delete-5:
+    Title: 'delete-5'
+    ExpectedToBeDeleted: 1
+  not-delete-1:
+    Title: 'not-delete-1'
+    ExpectedToBeDeleted: 0
+  not-delete-2:
+    Title: 'not-delete-2'
+    ExpectedToBeDeleted: 0
+  not-delete-3:
+    Title: 'not-delete-3'
+    ExpectedToBeDeleted: 0
+  not-delete-4:
+    Title: 'not-delete-4'
+    ExpectedToBeDeleted: 0
+  not-delete-5:
+    Title: 'not-delete-5'
+    ExpectedToBeDeleted: 0
+  not-delete-6:
+    Title: 'not-delete-6'
+    ExpectedToBeDeleted: 0

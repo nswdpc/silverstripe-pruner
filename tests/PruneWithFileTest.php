@@ -1,182 +1,152 @@
 <?php
 
-namespace NSWDPC\Utility\Pruner\Tests;
+namespace NSWDPC\Pruner\Tests;
 
+use NSWDPC\Pruner\Pruner;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Dev\TestOnly;
+use Silverstripe\Assets\Dev\TestAssetStore;
 
 /**
  * Pruning test of a record with one file
  */
 class PruneWithFileTest extends SapphireTest
 {
-    const TEST_FILE = 'prIk6PdCrgg.jpg';
 
-    protected $test_file_hash = "";
-    protected $copied_files = [];
-    protected $test_asset_directory = "";
-    private $test_asset_folder;
+    /**
+     * @var string
+     */
+    protected static $fixture_file = 'PruneWithFileTest.yml';
 
+    /**
+     * @var bool
+     */
     protected $usesDatabase = true;
 
+    /**
+     * @var array
+     */
     protected static $extra_dataobjects = [
-        TestWithFile::class,
-        TestFile::class,
+        TestRecordWithFile::class,
+        TestFile::class
     ];
+
+    /**
+     * @var int
+     */
+    protected $days_ago = 30;
+
+    /**
+     * @var int
+     */
+    protected $limit = 500;
 
     public function setUp()
     {
         parent::setUp();
-        // do this only once
-        $source = dirname(__FILE__) . '/files/' . self::TEST_FILE;
-        $this->test_file_hash = hash('sha256', file_get_contents($source));
-        // create an assets dir to store files in
-        $this->test_asset_directory = 'PruneWithFileTest';
+
+        TestAssetStore::activate('PruneWithFileTest');
+        $fileIDs = $this->allFixtureIDs(TestFile::class);
+        foreach ($fileIDs as $fileID) {
+            /** @var File $file */
+            $file = DataObject::get_by_id(TestFile::class, $fileID);
+            $file->setFromString(str_repeat('x', 1000000), $file->getFilename());
+        }
+
     }
 
     public function tearDown()
     {
-        $this->unlinkCopiedFiles();
+        TestAssetStore::reset();
         parent::tearDown();
     }
 
-    private function unlinkCopiedFiles()
-    {
-        if ($this->test_asset_folder instanceof Folder) {
-            $this->test_asset_folder->delete();
-        }
+    public function testAncientPrune() {
+        $ancient = $this->objFromFixture(TestRecordWithFile::class, 'ancient');
+        $fileCount = $ancient->Files()->count();
+
+        $sng = Injector::inst()->create(TestRecordWithFile::class);
+
+        $pruneList = $sng->pruneList($this->days_ago, $this->limit);
+
+        $filteredList = $pruneList->filter(['ID' => $ancient->ID]);
+
+        $this->assertEquals(1, $filteredList->count(), "Ancient is a list record");
+
+        $pruneFileList = $filteredList->first()->pruneFilesList();
+
+        $this->assertEquals($fileCount, $pruneFileList->count(), "File count matches");
     }
 
-    private function checkFileHash($data)
-    {
-        $target_hash = hash('sha256', $data);
-        return $target_hash == $this->test_file_hash;
+    public function testFuturePrune() {
+        $future = $this->objFromFixture(TestRecordWithFile::class, 'future');
+        $fileCount = $future->Files()->count();
+
+        $sng = Injector::inst()->create(TestRecordWithFile::class);
+
+        $pruneList = $sng->pruneList($this->days_ago, $this->limit);
+
+        $filteredList = $pruneList->filter(['ID' => $future->ID]);
+
+        $this->assertEquals(0, $filteredList->count(), "Future is not a list record");
     }
 
-    /**
-    * @returns File
-    */
-    private function createFile($prefix, $record_id)
+    public function testPrune()
     {
-        $folder = Folder::find_or_make($this->test_asset_directory);
-        $this->assertTrue($folder instanceof Folder && !empty($folder->ID));
 
-        $this->test_asset_folder = $folder;
-
-        $filename = $prefix . "_" . self::TEST_FILE;
-        $file_filename = $this->test_asset_directory . "/" . $filename;
-
-        $source = dirname(__FILE__) . '/files/' . self::TEST_FILE;
-        $this->assertTrue(is_readable($source), "Source {$source} is not readable");
-
-        $file = TestFile::create();
-        $file->ParentID = $folder->ID;
-        $file->TestRecordID = $record_id;// linked to this record
-        $file->Name = $file->Title = $filename;
-        $file_id = $file->write();
-
-        $file->setFromString(file_get_contents($source), $file_filename);
-        $file->write();
-
-        $this->assertEquals($file_id, $file->ID);
-        return $file;
-    }
-
-    /**
-    * Test that a record with a file can be pruned
-    */
-    public function testPruneWithFile()
-    {
-        $model = TestWithFile::class;
         $target_models = [
-            $model
+            TestRecordWithFile::class
         ];
 
         $pruner = Pruner::create();
 
-        $days_ago = 30;
-        $limit = 500;
+        $totalRecords = TestRecordWithFile::get();
+        $totalRecordsCount = $totalRecords->count();
 
-        $keep = $discard = 0;
-        $ids = [];
-
-        $total_test_records = 10;
-
-        $dt = new \DateTime();
-        $dt->modify("-{$days_ago} days");// put it on the boundary
-        $discard_dt = clone($dt);
-        $discard_dt->modify("-5 days");// 35 days ago will discard
-        $keep_dt = clone($dt);
-        $keep_dt->modify("+5 days");// 25 days will keep
-
-        $this->copied_files = [];
-        for ($i=0; $i<$total_test_records; $i++) {
-            if ($i % 2 == 0) {
-                $datetime_formatted = $discard_dt->format('Y-m-d H:i:s');
-                $discard++;
-            } else {
-                $datetime_formatted = $keep_dt->format('Y-m-d H:i:s');
-                $keep++;
-            }
-
-            $data = [
-                'Title' => "TestWithFile {$i}",
-                'DateCheck' => $datetime_formatted
-            ];
-
-            //print_r($data);
-
-            $record = new TestWithFile($data);
-            $id = $record->write();
-            if (!$id) {
-                throw new Exception("Failed to write TestWithFile record");
-            }
-
-            $file = $this->createFile("f" . $id, $id);
-            $this->assertTrue($file instanceof File, "Created file is not a File object");
-            // store the file - for later checks
-            $this->copied_files[] = [
-                'RecordID' => $id,
-                'FileID' => $file->ID,
-                'Name' => $file->Name,
-            ];
-
-            Logger::log("Created file:" . $file->getFilename(), Logger::DEBUG);
-
-            $ids[] = $id;
+        $expectedToKeep = TestRecordWithFile::get()->filter(['ExpectedToBeDeleted' => 0]);
+        // store files IDs expected to be kept
+        $expectedToKeepFiles = [];
+        foreach($expectedToKeep as $testRecord) {
+            $expectedToKeepFiles = array_merge($expectedToKeepFiles, $testRecord->Files()->column('ID'));
         }
+        $expectedToKeepCount = $expectedToKeep->count();
 
+        $expectedToRemove = TestRecordWithFile::get()->filter(['ExpectedToBeDeleted' => 1]);
+        // store files IDs expected to be removed
+        $expectedToRemoveFiles = [];
+        foreach($expectedToRemove as $testRecord) {
+            $expectedToRemoveFiles = array_merge($expectedToRemoveFiles, $testRecord->Files()->column('ID'));
+        }
+        $expectedToRemoveCount = $expectedToRemove->count();
 
-        $records = TestWithFile::get();
-
-        $this->assertTrue($records->count() == $total_test_records);
-
-        $pruner = Pruner::create();
-        $results = $pruner->prune($days_ago, $limit, $target_models);
+        $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
 
         $this->assertTrue(is_array($results) && isset($results['total']) && isset($results['pruned']), "Result is sane");
-        // the amount pruned must match what we expect
-        $this->assertTrue($results['pruned'] == $discard, "Pruned == discard");
 
-        $unpruned = $results['total'] - $results['pruned'];
+        // get not pruned
+        $unpruned = $totalRecordsCount - $results['pruned'];
 
-        // check that they have been deleted
-        $kept = 0;
-        foreach ($ids as $id) {
-            $record = TestWithFile::get()->byId($id);
-            if (!empty($record->ID)) {
-                $kept++;
-            }
-        }
+        // check record count removed
+        $this->assertEquals($expectedToRemoveCount, $results['pruned'], "Pruned == expectedToRemove count");
+        // check records remaining
+        $this->assertEquals($expectedToKeepCount, $unpruned, "Unpruned == expectedToKeep count");
 
-        // records in the table should equal the records we have kept
-        $this->assertTrue($kept == $keep, "Not all records pruned {$kept}/{$keep}");
+        // check files remove
+        $filesRemoved = File::get()->filter(['ID' => $expectedToRemoveFiles]);
+        $this->assertEquals( 0, $filesRemoved->count(), "All expected files removed");
 
-        $this->assertTrue(!empty($results['keys']), 'Keys in results are empty');
-        $this->assertTrue(!empty($results['file_keys']), 'File_Keys in results are empty');
+        // check files kept
+        $filesKept = File::get()->filter(['ID' => $expectedToKeepFiles]);
+        $this->assertEquals( count($expectedToKeepFiles), $filesKept->count(), "All kepts files retained");
+
+        $this->assertEmpty($results['keys'], 'Keys in results are empty');
+        $this->assertFalse($results['report_only'], 'Was not report_only');
+
+
     }
 }

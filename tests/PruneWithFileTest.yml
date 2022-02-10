@@ -1,0 +1,85 @@
+NSWDPC\Pruner\Tests\TestFile:
+  jpg-1:
+    FileFilename: image.jpg
+    Name: image.jpg
+  txt-1:
+    FileFilename: policy-1.txt
+    Name: policy-1.txt
+  txt-2:
+    FileFilename: policy-2.txt
+    Name: policy-2.txt
+  txt-3:
+    FileFilename: policy-3.txt
+    Name: policy-3.txt
+  pdf-1:
+    FileFilename: pdf-1.pdf
+    Name: pdf-1.pdf
+  pdf-2:
+    FileFilename: pdf-2.pdf
+    Name: pdf-2.pdf
+  pdf-3:
+    FileFilename: pdf-3.pdf
+    Name: pdf-3.pdf
+  txt-4:
+    FileFilename: policy-4.txt
+    Name: policy-4.txt
+  pdf-4:
+    FileFilename: pdf-4.pdf
+    Name: pdf-4.pdf
+
+NSWDPC\Pruner\Tests\TestRecordWithFile:
+  ancient:
+    Title: 'ancient'
+    ExpectedToBeDeleted: 1
+    Files:
+      - '=>NSWDPC\Pruner\Tests\TestFile.jpg-1'
+      - '=>NSWDPC\Pruner\Tests\TestFile.txt-1'
+      - '=>NSWDPC\Pruner\Tests\TestFile.pdf-3'
+  future:
+    Title: 'future'
+    ExpectedToBeDeleted: 0
+    Files:
+      - '=>NSWDPC\Pruner\Tests\TestFile.txt-2'
+      - '=>NSWDPC\Pruner\Tests\TestFile.pdf-2'
+  delete-1:
+    Title: 'delete-1'
+    ExpectedToBeDeleted: 1
+    Files:
+      - '=>NSWDPC\Pruner\Tests\TestFile.pdf-1'
+  delete-2:
+    Title: 'delete-2'
+    ExpectedToBeDeleted: 1
+  delete-3:
+    Title: 'delete-3'
+    ExpectedToBeDeleted: 1
+  delete-4:
+    Title: 'delete-4'
+    ExpectedToBeDeleted: 1
+  delete-5:
+    Title: 'delete-5'
+    ExpectedToBeDeleted: 1
+    Files:
+      - '=>NSWDPC\Pruner\Tests\TestFile.txt-4'
+      - '=>NSWDPC\Pruner\Tests\TestFile.pdf-4'
+  not-delete-1:
+    Title: 'not-delete-1'
+    ExpectedToBeDeleted: 0
+  not-delete-2:
+    Title: 'not-delete-2'
+    ExpectedToBeDeleted: 0
+    Files:
+      - '=>NSWDPC\Pruner\Tests\TestFile.pdf-3'
+  not-delete-3:
+    Title: 'not-delete-3'
+    ExpectedToBeDeleted: 0
+    Files:
+      - '=>NSWDPC\Pruner\Tests\TestFile.txt-3'
+  not-delete-4:
+    Title: 'not-delete-4'
+    ExpectedToBeDeleted: 0
+  not-delete-5:
+    Title: 'not-delete-5'
+    ExpectedToBeDeleted: 0
+  not-delete-6:
+    Title: 'not-delete-6'
+    ExpectedToBeDeleted: 0
