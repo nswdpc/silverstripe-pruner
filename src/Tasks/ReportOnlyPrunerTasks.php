@@ -2,8 +2,8 @@
 
 namespace NSWDPC\Pruner;
 
-use NSWDPC\Utility\Pruner\Models\Pruner;
 use SilverStripe\Dev\BuildTask;
+use SilverStripe\ORM\DB;
 
 /**
  * Run a task to report on which records would be pruned
@@ -11,16 +11,21 @@ use SilverStripe\Dev\BuildTask;
  */
 class ReportOnlyPrunerTask extends BuildTask
 {
-    
+
     /**
-     * @var string
+     * @inheritdoc
      */
     protected $title = "Tasks to report on which records would be pruned based on arguments provided";
 
     /**
-     * @var string
+     * @inheritdoc
      */
     protected $description = "This tasks does not delete any records";
+
+    /**
+     * @inheritdoc
+     */
+    private static $segment = "ReportOnlyPrunerTask";
 
     /**
      * Run the task
@@ -28,38 +33,44 @@ class ReportOnlyPrunerTask extends BuildTask
     public function run($request)
     {
         // options
-        $days_ago = (int)$request->getVar('days_ago');
-        $targets = $request->getVar('targets');
-        $limit = (int)$request->getVar('limit');
+        $age = intval($request->getVar('age'));
+        if(!$age) {
+            $age = 30;
+        }
+        DB::alteration_message("Using age={$age}", "warning");
+        $limit = intval($request->getVar('limit'));
+        if(!$limit) {
+            $limit = 500;
+        }
+        DB::alteration_message("Using limit={$age}", "warning");
 
-        $target_models = [];
-        if (strpos($targets, ",") !== false) {
-            $target_models = explode(",", $targets);
-        } else {
-            $target_models = [ $targets ];
+        $targets = $request->getVar('targets');
+        $target_models = array_filter( array_map("trim", explode(",", $targets) ) );
+        if(empty($target_models)) {
+            DB::alteration_message("Target models is empty", "warning");
         }
 
         $pruner = Pruner::create();
-        $results = $pruner->prune($days_ago, $limit, $target_models, true);
+        $results = $pruner->prune($age, $limit, $target_models, true);
         if (!$results) {
-            print "Seems to have failed";
-            exit(1);
+            DB::alteration_message("Task seems to have failed", "error");
+            return;
         } else {
-            print "REPORT\n";
-            print "======\n";
-            print "Total: {$results['pruned']}/{$results['total']} records pruned\n";
-            print "======\n";
-            print "KEYS\n";
+            $output = "\tREPORT\n";
+            $output .= "\t======\n";
+            $output .= "\tTotal: {$results['pruned']}/{$results['total']} records pruned\n";
+            $output .= "\t======\n";
+            $output .= "\tKEYS\n";
             foreach ($results['keys'] as $key) {
-                print "\nRECORD: {$key}\n";
+                $output .= "\n\tRECORD: {$key}\n";
                 if (!empty($results['report_file_keys'][ $key ])) {
-                    print "\tFILES: " .  count($results['report_file_keys'][ $key ]) . "\n";
+                    $output .= "\t\tFILES: " .  count($results['report_file_keys'][ $key ]) . "\n";
                     foreach ($results['report_file_keys'][ $key ] as $file_key) {
-                        print "\t\t{$file_key}\n";
+                        $output .= "\t\t\t{$file_key}\n";
                     }
                 }
             }
-            return true;
+            DB::alteration_message($output, "info");
         }
     }
 }
