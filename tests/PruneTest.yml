@@ -38,3 +38,7 @@ NSWDPC\Pruner\Tests\TestRecord:
   not-delete-6:
     Title: 'not-delete-6'
     ExpectedToBeDeleted: 0
+
+NSWDPC\Pruner\Tests\TestOtherRecord:
+  another-record:
+    Title: 'another-record'

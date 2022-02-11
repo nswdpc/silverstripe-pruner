@@ -117,7 +117,7 @@ class Pruner
                 if($list instanceof DataList) {
                     $dataClass = $list->dataClass();
                     if(!($instance instanceof $dataClass) ) {
-                        throw new InvalidModelListException("Singleton instance of '{$model}' should be an instance of '{$dataClass}'");
+                        throw new InvalidModelListException("Returned DataList of type '{$dataClass}' should be an instance of '{$model}'");
                     }
                 }
 

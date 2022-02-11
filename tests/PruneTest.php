@@ -3,6 +3,7 @@
 namespace NSWDPC\Pruner\Tests;
 
 use NSWDPC\Pruner\Pruner;
+use NSWDPC\Pruner\InvalidModelListException;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Dev\TestOnly;
@@ -41,6 +42,7 @@ class PruneTest extends SapphireTest
      */
     protected static $extra_dataobjects = [
         TestRecord::class,
+        TestOtherRecord::class
     ];
 
     public function setUp() {
@@ -49,6 +51,25 @@ class PruneTest extends SapphireTest
 
     public function tearDown() : void {
         parent::tearDown();
+    }
+
+    /**
+     * Test DataList / dataClass mismatch
+     */
+    public function testDataClassMatch() {
+
+        $target_models = [
+            TestOtherRecord::class
+        ];
+
+        try {
+            $pruner = Pruner::create();
+            $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
+            $this->assertFalse(true, "Prune should have thrown an exception");
+        } catch (InvalidModelListException $e) {
+            // error caught here
+            $this->assertNotEmpty($e->getMessage());
+        }
     }
 
     public function testAncientPrune() {
