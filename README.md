@@ -74,6 +74,17 @@ The order of operation for each record removal is:
 
 You must implement these methods, even if you are not carrying out any actions pre/post record pruning.
 
+## Reporting task
+
+A task exists to provide quick report showing what would be removed based on the arguments provided:
+
+Report for the targeted models, older than 15 days, limit 50 records removed per model
+```shell
+./vendor/bin/sake dev/tasks/ReportOnlyPrunerTask age=15 limit=50 targets=SilverStripe\\UserForms\\Model\\Submission\\SubmittedForm
+```
+
+Multiple targets can be separated by a comma. If not targets are provided, the configured value of `NSWDPC\Pruner\Pruner.target_models` is used.
+
 ## Maintainers
 
 + [dpcdigital@NSWDPC:~$](https://dpc.nsw.gov.au)
