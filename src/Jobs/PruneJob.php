@@ -33,7 +33,7 @@ class PruneJob extends AbstractQueuedJob
     private static $default_limit = 50;// 1-hourly job runs should result in 1200 records per target_model per day
 
     /**
-     * @param int $days_ago default days in past to prune up to
+     * @param float $days_ago default days in past to prune up to
      * @param int $limit default record limit (per model)
      * @param string $targets comma separated list of classnames being models to prune records from, if none provided the configured target_models are used
      * @param boolean $report_only when true, results returned show what would have been done

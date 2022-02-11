@@ -56,13 +56,13 @@ class Pruner
 
     /**
      * Gathers a datalist of supporting models and prunes matching records
-     * @param int $days_ago number of days in the past to prune up to. E.g 30 will prune matching records up to 30 days ago
+     * @param float $days_ago number of days in the past to prune up to. E.g 30 will prune matching records up to 30 days ago
      * @param int $limit limit the number of records returned in any one list
      * @param array $targets
      * @param boolean $report_only
      * @return array of results, either complete or partial results (if an error occurred)
      */
-    public function prune(int $days_ago = 30, int $limit = 500, array $targets = [], bool $report_only = false) : array
+    public function prune(float $days_ago = 30, int $limit = 500, array $targets = [], bool $report_only = false) : array
     {
         $this->results = [
             'total' => 0,
@@ -83,11 +83,11 @@ class Pruner
             throw new \InvalidArgumentException("No target models configured");
         }
 
-        if (!is_int($days_ago) || $days_ago <= 0) {
+        if ($days_ago <= 0) {
             $days_ago = 30;
         }
 
-        if (!is_int($limit) || $limit <= 0) {
+        if ($limit <= 0) {
             $limit = 500;
         }
 

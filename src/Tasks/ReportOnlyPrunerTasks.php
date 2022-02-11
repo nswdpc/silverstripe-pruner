@@ -33,7 +33,7 @@ class ReportOnlyPrunerTask extends BuildTask
     public function run($request)
     {
         // options
-        $age = intval($request->getVar('age'));
+        $age = floatval($request->getVar('age'));
         if(!$age) {
             $age = 30;
         }
