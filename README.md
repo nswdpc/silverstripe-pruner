@@ -59,6 +59,12 @@ You can pass in the following constructor arguments:
 + `$targets` - a comma separated model of DataObject classnames (namespace). If left empty the configured names will be used, if any. This allow you to schedule removal of a certain class of records at a certain time.
 + `$report_only` - 0|1 - pass in 1 to only report on what would be removed.
 
+### Returning a list of records to remove
+
+While the most common list to return would be records older than the `days_ago` age parameter, you are in control of how records are filtered as returned from `pruneList`.
+
+You can add extra filters to the query or modify/ignore the age parameter entirely. For instance, you could remove records older than a certain date and not authored by members in a specific domain.
+
 ## Operations pre/post prune
 
 In addition to the usual onBeforeDelete/onAfterDelete Silverstripe methods, the module calls onBeforePrune and onAfterPrune before/after record deletion, respectively.
