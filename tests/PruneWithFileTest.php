@@ -46,7 +46,7 @@ class PruneWithFileTest extends SapphireTest
      */
     protected $limit = 500;
 
-    public function setUp()
+    public function setUp() : void
     {
         parent::setUp();
 
@@ -60,7 +60,7 @@ class PruneWithFileTest extends SapphireTest
 
     }
 
-    public function tearDown()
+    public function tearDown() : void
     {
         TestAssetStore::reset();
         parent::tearDown();
