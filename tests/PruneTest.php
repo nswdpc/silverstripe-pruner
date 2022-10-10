@@ -45,7 +45,7 @@ class PruneTest extends SapphireTest
         TestOtherRecord::class
     ];
 
-    public function setUp() {
+    public function setUp() : void {
         parent::setUp();
     }
 
