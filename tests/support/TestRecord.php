@@ -30,7 +30,7 @@ class TestRecord extends DataObject implements TestOnly, PrunerInterface
         'ExpectedToBeDeleted' => 'Boolean'
     ];
 
-    public function pruneList($days_ago, $limit) : SS_List
+    public function pruneList(int $days_ago, int $limit) : SS_List
     {
         $list = self::get()->filter(['ExpectedToBeDeleted' => 1]);
         return $list;

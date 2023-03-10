@@ -30,7 +30,7 @@ class TestOtherRecord extends DataObject implements TestOnly, PrunerInterface
         'Title' => 'Varchar(255)',
     ];
 
-    public function pruneList($days_ago, $limit) : SS_List
+    public function pruneList(int $days_ago, int $limit) : SS_List
     {
         $list = TestRecord::get()->filter(['ExpectedToBeDeleted' => 1]);
         return $list;
