@@ -42,7 +42,7 @@ class ReportOnlyPrunerTask extends BuildTask
         if(!$limit) {
             $limit = 500;
         }
-        DB::alteration_message("Using limit={$age}", "warning");
+        DB::alteration_message("Using limit={$limit}", "warning");
 
         $targets = $request->getVar('targets');
         $target_models = array_filter( array_map("trim", explode(",", $targets) ) );
