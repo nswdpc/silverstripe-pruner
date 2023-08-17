@@ -17,7 +17,15 @@
     ],
     "autoload": {
         "psr-4": {
-            "NSWDPC\\Pruner\\": "src/",
+            "NSWDPC\\Pruner\\": [
+                "src/Exceptions/",
+                "src/Extensions/",
+                "src/Interfaces/",
+                "src/Jobs/",
+                "src/Models/",
+                "src/Services/",
+                "src/Tasks/"
+            ],
             "NSWDPC\\Pruner\\Tests\\": "tests/"
         }
     },
