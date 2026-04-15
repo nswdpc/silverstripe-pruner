@@ -11,7 +11,6 @@ use SilverStripe\ORM\DB;
  */
 class ReportOnlyPrunerTask extends BuildTask
 {
-
     /**
      * @inheritdoc
      */
@@ -34,21 +33,21 @@ class ReportOnlyPrunerTask extends BuildTask
     {
         // options
         $age = floatval($request->getVar('age'));
-        if(!$age) {
+        if (!$age) {
             $age = 30;
         }
 
         DB::alteration_message("Using age={$age}", "warning");
         $limit = intval($request->getVar('limit'));
-        if(!$limit) {
+        if (!$limit) {
             $limit = 500;
         }
 
         DB::alteration_message("Using limit={$limit}", "warning");
 
         $targets = $request->getVar('targets');
-        $target_models = array_filter( array_map(trim(...), explode(",", $targets) ) );
-        if($target_models === []) {
+        $target_models = array_filter(array_map(trim(...), explode(",", $targets)));
+        if ($target_models === []) {
             DB::alteration_message("Target models is empty", "warning");
         }
 

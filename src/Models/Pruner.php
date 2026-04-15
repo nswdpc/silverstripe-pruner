@@ -6,8 +6,6 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\Assets\File;
-use SilverStripe\Assets\Folder;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
@@ -59,7 +57,7 @@ class Pruner
      * @param int $limit limit the number of records returned in any one list
      * @return array of results, either complete or partial results (if an error occurred)
      */
-    public function prune(float $days_ago = 30, int $limit = 500, array $targets = [], bool $report_only = false) : array
+    public function prune(float $days_ago = 30, int $limit = 500, array $targets = [], bool $report_only = false): array
     {
         $this->results = [
             'total' => 0,
@@ -100,7 +98,7 @@ class Pruner
                 //attempt to grab a valid instance of the model
                 $instance = $this->isValidModel($model);
 
-                if(!$instance->hasMethod('pruneList')) {
+                if (!$instance->hasMethod('pruneList')) {
                     throw new InvalidModelListException("{$model} or extension does not have pruneList method");
                 }
 
@@ -115,9 +113,9 @@ class Pruner
                 }
 
                 // restrict DataList dataClass to the class of  model instance
-                if($list instanceof DataList) {
+                if ($list instanceof DataList) {
                     $dataClass = $list->dataClass();
-                    if(!($instance instanceof $dataClass) ) {
+                    if (!($instance instanceof $dataClass)) {
                         throw new InvalidModelListException("Returned DataList of type '{$dataClass}' should be an instance of '{$model}'");
                     }
                 }
@@ -165,7 +163,8 @@ class Pruner
     /**
      * Determine whether the passed instance can be pruned
      */
-    public static function recordIsPruneable(DataObject $instance) : bool {
+    public static function recordIsPruneable(DataObject $instance): bool
+    {
         $implements = self::implementsPrunerInterface($instance);
         if (!$implements) {
             // check whether an extension implements the Interface
@@ -185,7 +184,7 @@ class Pruner
     /**
      * Determine whether an instance implements {@link \NSWDPC\Pruner\PrunerInterface}
      */
-    protected static function implementsPrunerInterface(object $instance) : bool
+    protected static function implementsPrunerInterface(object $instance): bool
     {
         $rc = new \ReflectionClass($instance);
         return $rc->implementsInterface(PrunerInterface::class);
@@ -196,9 +195,9 @@ class Pruner
      * @param DataObject $record implementing PrunerInterface or has an extension implementing it
      * @throws \Exception
      */
-    protected function pruneRecord(DataObject $record) : bool
+    protected function pruneRecord(DataObject $record): bool
     {
-        if(static::recordIsPruneable($record)) {
+        if (static::recordIsPruneable($record)) {
             // The record should delete itself in prune(), if it can, along with all associations
             // @phpstan-ignore method.notFound
             $record->onBeforePrune();
@@ -220,7 +219,7 @@ class Pruner
      */
     private function getRecordFiles(DataObject $record): ?DataList
     {
-        if(static::recordIsPruneable($record)) {
+        if (static::recordIsPruneable($record)) {
             // @phpstan-ignore method.notFound
             return $record->pruneFilesList();
         } else {

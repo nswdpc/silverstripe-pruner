@@ -5,12 +5,8 @@ namespace NSWDPC\Pruner\Tests;
 use NSWDPC\Pruner\Pruner;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Assets\File;
-use SilverStripe\Assets\Folder;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Dev\TestOnly;
 use SilverStripe\Assets\Dev\TestAssetStore;
 
 /**
@@ -18,7 +14,6 @@ use SilverStripe\Assets\Dev\TestAssetStore;
  */
 class PruneWithFileTest extends SapphireTest
 {
-
     /**
      * @var string
      */
@@ -44,7 +39,7 @@ class PruneWithFileTest extends SapphireTest
      */
     protected $limit = 500;
 
-    public function setUp() : void
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -58,13 +53,14 @@ class PruneWithFileTest extends SapphireTest
 
     }
 
-    public function tearDown() : void
+    public function tearDown(): void
     {
         TestAssetStore::reset();
         parent::tearDown();
     }
 
-    public function testAncientPrune(): void {
+    public function testAncientPrune(): void
+    {
         $ancient = $this->objFromFixture(TestRecordWithFile::class, 'ancient');
         // @phpstan-ignore method.notFound
         $fileCount = $ancient->Files()->count();
@@ -83,7 +79,8 @@ class PruneWithFileTest extends SapphireTest
         $this->assertEquals($fileCount, $pruneFileList->count(), "File count matches");
     }
 
-    public function testFuturePrune(): void {
+    public function testFuturePrune(): void
+    {
         $future = $this->objFromFixture(TestRecordWithFile::class, 'future');
         // @phpstan-ignore method.notFound
         $future->Files()->count();
@@ -113,7 +110,7 @@ class PruneWithFileTest extends SapphireTest
         $expectedToKeep = TestRecordWithFile::get()->filter(['ExpectedToBeDeleted' => 0]);
         // store files IDs expected to be kept
         $expectedToKeepFiles = [];
-        foreach($expectedToKeep as $testRecord) {
+        foreach ($expectedToKeep as $testRecord) {
             // @phpstan-ignore method.notFound
             $expectedToKeepFiles = array_merge($expectedToKeepFiles, $testRecord->Files()->column('ID'));
         }
@@ -123,7 +120,7 @@ class PruneWithFileTest extends SapphireTest
         $expectedToRemove = TestRecordWithFile::get()->filter(['ExpectedToBeDeleted' => 1]);
         // store files IDs expected to be removed
         $expectedToRemoveFiles = [];
-        foreach($expectedToRemove as $testRecord) {
+        foreach ($expectedToRemove as $testRecord) {
             // @phpstan-ignore method.notFound
             $expectedToRemoveFiles = array_merge($expectedToRemoveFiles, $testRecord->Files()->column('ID'));
         }
@@ -144,11 +141,11 @@ class PruneWithFileTest extends SapphireTest
 
         // check files remove
         $filesRemoved = File::get()->filter(['ID' => $expectedToRemoveFiles]);
-        $this->assertEquals( 0, $filesRemoved->count(), "All expected files removed");
+        $this->assertEquals(0, $filesRemoved->count(), "All expected files removed");
 
         // check files kept
         $filesKept = File::get()->filter(['ID' => $expectedToKeepFiles]);
-        $this->assertEquals( count($expectedToKeepFiles), $filesKept->count(), "All kepts files retained");
+        $this->assertEquals(count($expectedToKeepFiles), $filesKept->count(), "All kepts files retained");
 
         $this->assertEmpty($results['keys'], 'Keys in results are empty');
         $this->assertFalse($results['report_only'], 'Was not report_only');

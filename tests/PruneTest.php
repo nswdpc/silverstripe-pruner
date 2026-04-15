@@ -5,10 +5,7 @@ namespace NSWDPC\Pruner\Tests;
 use NSWDPC\Pruner\Pruner;
 use NSWDPC\Pruner\InvalidModelListException;
 use SilverStripe\ORM\DataList;
-use SilverStripe\ORM\DataObject;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\Dev\TestOnly;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 
 /**
@@ -17,7 +14,6 @@ use SilverStripe\Core\Injector\Injector;
  */
 class PruneTest extends SapphireTest
 {
-
     /**
      * @var bool
      */
@@ -43,18 +39,21 @@ class PruneTest extends SapphireTest
         TestOtherRecord::class
     ];
 
-    public function setUp() : void {
+    public function setUp(): void
+    {
         parent::setUp();
     }
 
-    public function tearDown() : void {
+    public function tearDown(): void
+    {
         parent::tearDown();
     }
 
     /**
      * Test DataList / dataClass mismatch
      */
-    public function testDataClassMatch(): void {
+    public function testDataClassMatch(): void
+    {
 
         $target_models = [
             TestOtherRecord::class
@@ -71,7 +70,8 @@ class PruneTest extends SapphireTest
         }
     }
 
-    public function testAncientPrune(): void {
+    public function testAncientPrune(): void
+    {
         $ancient = $this->objFromFixture(TestRecord::class, 'ancient');
 
         $list = Injector::inst()->create(TestRecord::class)
@@ -82,7 +82,8 @@ class PruneTest extends SapphireTest
         $this->assertEquals(1, $list->filter(['ID' => $ancient->ID])->count(), "Ancient is a list record");
     }
 
-    public function testFuturePrune(): void {
+    public function testFuturePrune(): void
+    {
         $future = $this->objFromFixture(TestRecord::class, 'future');
 
         $list = Injector::inst()->create(TestRecord::class)

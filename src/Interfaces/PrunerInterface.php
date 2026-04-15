@@ -12,15 +12,14 @@ use SilverStripe\ORM\SS_List;
  */
 interface PrunerInterface
 {
-
     /**
      * Return a list of records to be pruned
      */
-    public function pruneList(int $days_ago, int $limit) : SS_List;
+    public function pruneList(int $days_ago, int $limit): SS_List;
 
-    public function onBeforePrune() : void;
+    public function onBeforePrune(): void;
 
-    public function onAfterPrune() : void;
+    public function onAfterPrune(): void;
 
-    public function pruneFilesList() : SS_List;
+    public function pruneFilesList(): SS_List;
 }

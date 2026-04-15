@@ -13,7 +13,6 @@ use SilverStripe\Dev\TestOnly;
  */
 class TestFile extends File implements TestOnly
 {
-
     private static string $table_name = "PrunerTestFile";
 
     /**

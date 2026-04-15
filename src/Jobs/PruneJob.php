@@ -14,7 +14,6 @@ use SilverStripe\Core\Config\Configurable;
  */
 class PruneJob extends AbstractQueuedJob
 {
-
     use Configurable;
 
     private static int $repeat_hours = 1;// hours
@@ -81,10 +80,10 @@ class PruneJob extends AbstractQueuedJob
      * Get the next job start DateTime, formatted
      * If there is no repeat_hours value configure the job does not automatically repeat
      */
-    public function getNextStartDateTime() : string
+    public function getNextStartDateTime(): string
     {
         $hours = self::config()->get('repeat_hours');
-        if(!$hours || $hours <= 0) {
+        if (!$hours || $hours <= 0) {
             return '';
         } else {
             $dt = new \DateTime();
@@ -98,7 +97,7 @@ class PruneJob extends AbstractQueuedJob
      */
     public function afterComplete()
     {
-        if($nextStartDateTime = $this->getNextStartDateTime()) {
+        if ($nextStartDateTime = $this->getNextStartDateTime()) {
             $job = new PruneJob($this->days_ago, $this->limit, $this->targets, $this->report_only);
             singleton(QueuedJobService::class)->queueJob($job, $nextStartDateTime);
         }

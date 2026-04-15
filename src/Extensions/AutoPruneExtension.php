@@ -18,7 +18,6 @@ use SilverStripe\Forms\FieldList;
  */
 class AutoPruneExtension extends DataExtension
 {
-
     /**
      * Database fields
      */

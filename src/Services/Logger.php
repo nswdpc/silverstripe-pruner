@@ -6,7 +6,6 @@ namespace NSWDPC\Pruner;
 
 use SilverStripe\Core\Injector\Injector;
 use Psr\Log\LoggerInterface;
-use SilverStripe\Security\Security;
 
 /**
  * Simple Logging class
@@ -14,21 +13,21 @@ use SilverStripe\Security\Security;
  */
 class Logger
 {
-    const DEBUG = 'DEBUG';
+    public const DEBUG = 'DEBUG';
 
-    const INFO = 'INFO';
+    public const INFO = 'INFO';
 
-    const NOTICE = 'NOTICE';
+    public const NOTICE = 'NOTICE';
 
-    const WARNING = 'WARNING';
+    public const WARNING = 'WARNING';
 
-    const ERROR = 'ERROR';
+    public const ERROR = 'ERROR';
 
-    const CRITICAL = 'CRITICAL';
+    public const CRITICAL = 'CRITICAL';
 
-    const ALERT = 'ALERT';
+    public const ALERT = 'ALERT';
 
-    const EMERGENCY = 'EMERGENCY';
+    public const EMERGENCY = 'EMERGENCY';
 
     public static function log(string|\Stringable $message, $level = "DEBUG")
     {
