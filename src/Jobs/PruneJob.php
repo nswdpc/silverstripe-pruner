@@ -16,7 +16,8 @@ class PruneJob extends AbstractQueuedJob
 {
     use Configurable;
 
-    private static int $repeat_hours = 1;// hours
+    private static int $repeat_hours = 1;
+    // hours
     private static int $default_days_ago = 30;
 
     private static int $default_limit = 50;// 1-hourly job runs should result in 1200 records per target_model per day
