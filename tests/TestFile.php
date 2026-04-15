@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace NSWDPC\Pruner\Tests;
 
 use SilverStripe\Assets\File;
@@ -15,10 +17,9 @@ class TestFile extends File implements TestOnly
     private static string $table_name = "PrunerTestFile";
 
     /**
-    * Database fields
-    * @var array
-    */
-    private static $has_one = [
+     * Database fields
+     */
+    private static array $has_one = [
         'Record' => TestRecordWithFile::class,
     ];
 }

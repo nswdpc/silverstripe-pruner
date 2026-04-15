@@ -54,7 +54,7 @@ class PruneTest extends SapphireTest
     /**
      * Test DataList / dataClass mismatch
      */
-    public function testDataClassMatch() {
+    public function testDataClassMatch(): void {
 
         $target_models = [
             TestOtherRecord::class
@@ -65,13 +65,13 @@ class PruneTest extends SapphireTest
             $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
             // @phpstan-ignore method.alreadyNarrowedType
             $this->assertFalse(true, "Prune should have thrown an exception");
-        } catch (InvalidModelListException $e) {
+        } catch (InvalidModelListException $invalidModelListException) {
             // error caught here
-            $this->assertNotEmpty($e->getMessage());
+            $this->assertNotEmpty($invalidModelListException->getMessage());
         }
     }
 
-    public function testAncientPrune() {
+    public function testAncientPrune(): void {
         $ancient = $this->objFromFixture(TestRecord::class, 'ancient');
 
         $list = Injector::inst()->create(TestRecord::class)
@@ -82,7 +82,7 @@ class PruneTest extends SapphireTest
         $this->assertEquals(1, $list->filter(['ID' => $ancient->ID])->count(), "Ancient is a list record");
     }
 
-    public function testFuturePrune() {
+    public function testFuturePrune(): void {
         $future = $this->objFromFixture(TestRecord::class, 'future');
 
         $list = Injector::inst()->create(TestRecord::class)
@@ -93,7 +93,7 @@ class PruneTest extends SapphireTest
         $this->assertEquals(0, $list->filter(['ID' => $future->ID])->count(), "Future is not a list record");
     }
 
-    public function testPrune()
+    public function testPrune(): void
     {
 
         $target_models = [

@@ -23,7 +23,7 @@ class Pruner
 
     use Injectable;
 
-    private static $target_models = [];// an array of all models that will be pruned
+    private static array $target_models = [];// an array of all models that will be pruned
 
     protected $results = [];
 
@@ -48,8 +48,8 @@ class Pruner
             }
 
             return $instance;
-        } catch (\Exception $e) {
-            throw new InvalidModelException($e->getMessage());
+        } catch (\Exception $exception) {
+            throw new InvalidModelException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
@@ -57,8 +57,6 @@ class Pruner
      * Gathers a datalist of supporting models and prunes matching records
      * @param float $days_ago number of days in the past to prune up to. E.g 30 will prune matching records up to 30 days ago
      * @param int $limit limit the number of records returned in any one list
-     * @param array $targets
-     * @param boolean $report_only
      * @return array of results, either complete or partial results (if an error occurred)
      */
     public function prune(float $days_ago = 30, int $limit = 500, array $targets = [], bool $report_only = false) : array
@@ -72,7 +70,7 @@ class Pruner
             'report_only' => $report_only
         ];
 
-        if (empty($targets)) {
+        if ($targets === []) {
             // use configured targets if none passed in
             $targets = $this->config()->get('target_models');
         }
@@ -113,7 +111,7 @@ class Pruner
                 }
 
                 if (!($list instanceof ArrayList) && !($list instanceof DataList)) {
-                    throw new InvalidModelListException("{$model} did not return an ArrayList || DataList - got a " . get_class($list));
+                    throw new InvalidModelListException("{$model} did not return an ArrayList || DataList - got a " . $list::class);
                 }
 
                 // restrict DataList dataClass to the class of  model instance
@@ -125,7 +123,7 @@ class Pruner
                 }
 
                 $list_count = $list->count();
-                if ($list_count == 0) {
+                if ($list_count === 0) {
                     Logger::log("Pruner::prune {$model}::pruneList() has no matching records.. this might be expected.", Logger::INFO);
                 } elseif ($report_only) {
                     // only report what would happen
@@ -135,7 +133,7 @@ class Pruner
                         $result_key = $record->ID . ":" . $record->ClassName . ":" . $record->Created;
                         Logger::log("Pruner::prune REPORT record {$result_key}", Logger::INFO);
                         $this->results['keys'][] = $result_key;
-                        if ($files = $this->getRecordFiles($record)) {
+                        if (($files = $this->getRecordFiles($record)) instanceof \SilverStripe\ORM\DataList) {
                             foreach ($files as $file) {
                                 $file_key = $file->ID . ":" . $file->ClassName;
                                 Logger::log("Pruner::prune REPORT linked file {$file_key}", Logger::INFO);
@@ -157,7 +155,7 @@ class Pruner
                     }
                 }
             } catch (\Exception $e) {
-                Logger::log("Pruner::prune failed on line {$e->getLine()} of file {$e->getFile()} message={$e->getMessage()} type=" . get_class($e), Logger::NOTICE);
+                Logger::log("Pruner::prune failed on line {$e->getLine()} of file {$e->getFile()} message={$e->getMessage()} type=" . $e::class, Logger::NOTICE);
             }
         }
 
@@ -172,7 +170,7 @@ class Pruner
         if (!$implements) {
             // check whether an extension implements the Interface
             $extensions = $instance->getExtensionInstances();
-            foreach ($extensions as $extension_class => $extension_instance) {
+            foreach ($extensions as $extension_instance) {
                 $implements = self::implementsPrunerInterface($extension_instance);
                 if ($implements) {
                     // huzzah
@@ -180,6 +178,7 @@ class Pruner
                 }
             }
         }
+
         return $implements;
     }
 
@@ -196,7 +195,6 @@ class Pruner
      * Prune the passed record implementing PrunerInterface
      * @param DataObject $record implementing PrunerInterface or has an extension implementing it
      * @throws \Exception
-     * @return bool
      */
     protected function pruneRecord(DataObject $record) : bool
     {

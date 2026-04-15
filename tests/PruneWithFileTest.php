@@ -64,7 +64,7 @@ class PruneWithFileTest extends SapphireTest
         parent::tearDown();
     }
 
-    public function testAncientPrune() {
+    public function testAncientPrune(): void {
         $ancient = $this->objFromFixture(TestRecordWithFile::class, 'ancient');
         // @phpstan-ignore method.notFound
         $fileCount = $ancient->Files()->count();
@@ -83,10 +83,10 @@ class PruneWithFileTest extends SapphireTest
         $this->assertEquals($fileCount, $pruneFileList->count(), "File count matches");
     }
 
-    public function testFuturePrune() {
+    public function testFuturePrune(): void {
         $future = $this->objFromFixture(TestRecordWithFile::class, 'future');
         // @phpstan-ignore method.notFound
-        $fileCount = $future->Files()->count();
+        $future->Files()->count();
 
         $sng = Injector::inst()->create(TestRecordWithFile::class);
 
@@ -98,7 +98,7 @@ class PruneWithFileTest extends SapphireTest
         $this->assertEquals(0, $filteredList->count(), "Future is not a list record");
     }
 
-    public function testPrune()
+    public function testPrune(): void
     {
 
         $target_models = [
@@ -117,6 +117,7 @@ class PruneWithFileTest extends SapphireTest
             // @phpstan-ignore method.notFound
             $expectedToKeepFiles = array_merge($expectedToKeepFiles, $testRecord->Files()->column('ID'));
         }
+
         $expectedToKeepCount = $expectedToKeep->count();
 
         $expectedToRemove = TestRecordWithFile::get()->filter(['ExpectedToBeDeleted' => 1]);
@@ -126,6 +127,7 @@ class PruneWithFileTest extends SapphireTest
             // @phpstan-ignore method.notFound
             $expectedToRemoveFiles = array_merge($expectedToRemoveFiles, $testRecord->Files()->column('ID'));
         }
+
         $expectedToRemoveCount = $expectedToRemove->count();
 
         $results = $pruner->prune($this->days_ago, $this->limit, $target_models);

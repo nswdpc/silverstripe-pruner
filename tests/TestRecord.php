@@ -17,23 +17,20 @@ class TestRecord extends DataObject implements TestOnly, PrunerInterface
 
     /**
      * Defines the database table name
-     * @var string
      */
-    private static $table_name = 'PruneTest_TestRecord';
+    private static string $table_name = 'PruneTest_TestRecord';
 
     /**
      * Database fields
-     * @var array
      */
-    private static $db = [
+    private static array $db = [
         'Title' => 'Varchar(255)',
         'ExpectedToBeDeleted' => 'Boolean'
     ];
 
     public function pruneList(int $days_ago, int $limit) : SS_List
     {
-        $list = self::get()->filter(['ExpectedToBeDeleted' => 1]);
-        return $list;
+        return self::get()->filter(['ExpectedToBeDeleted' => 1]);
     }
 
     public function onBeforePrune() : void
