@@ -4,6 +4,7 @@ namespace NSWDPC\Pruner\Tests;
 
 use NSWDPC\Pruner\Pruner;
 use NSWDPC\Pruner\InvalidModelListException;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Dev\TestOnly;
@@ -37,9 +38,6 @@ class PruneTest extends SapphireTest
      */
     protected $limit = 500;
 
-    /**
-     * @var array
-     */
     protected static $extra_dataobjects = [
         TestRecord::class,
         TestOtherRecord::class
@@ -65,6 +63,7 @@ class PruneTest extends SapphireTest
         try {
             $pruner = Pruner::create();
             $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
+            // @phpstan-ignore method.alreadyNarrowedType
             $this->assertFalse(true, "Prune should have thrown an exception");
         } catch (InvalidModelListException $e) {
             // error caught here
@@ -78,6 +77,8 @@ class PruneTest extends SapphireTest
         $list = Injector::inst()->create(TestRecord::class)
                     ->pruneList($this->days_ago, $this->limit);
 
+        $this->assertInstanceOf(DataList::class, $list);
+
         $this->assertEquals(1, $list->filter(['ID' => $ancient->ID])->count(), "Ancient is a list record");
     }
 
@@ -86,6 +87,8 @@ class PruneTest extends SapphireTest
 
         $list = Injector::inst()->create(TestRecord::class)
                     ->pruneList($this->days_ago, $this->limit);
+
+        $this->assertInstanceOf(DataList::class, $list);
 
         $this->assertEquals(0, $list->filter(['ID' => $future->ID])->count(), "Future is not a list record");
     }

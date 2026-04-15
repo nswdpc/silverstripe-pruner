@@ -8,9 +8,10 @@ use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Dev\TestOnly;
-use Silverstripe\Assets\Dev\TestAssetStore;
+use SilverStripe\Assets\Dev\TestAssetStore;
 
 /**
  * Pruning test of a record with one file
@@ -28,9 +29,6 @@ class PruneWithFileTest extends SapphireTest
      */
     protected $usesDatabase = true;
 
-    /**
-     * @var array
-     */
     protected static $extra_dataobjects = [
         TestRecordWithFile::class,
         TestFile::class
@@ -68,12 +66,14 @@ class PruneWithFileTest extends SapphireTest
 
     public function testAncientPrune() {
         $ancient = $this->objFromFixture(TestRecordWithFile::class, 'ancient');
+        // @phpstan-ignore method.notFound
         $fileCount = $ancient->Files()->count();
 
         $sng = Injector::inst()->create(TestRecordWithFile::class);
 
         $pruneList = $sng->pruneList($this->days_ago, $this->limit);
 
+        // @phpstan-ignore method.notFound
         $filteredList = $pruneList->filter(['ID' => $ancient->ID]);
 
         $this->assertEquals(1, $filteredList->count(), "Ancient is a list record");
@@ -85,12 +85,14 @@ class PruneWithFileTest extends SapphireTest
 
     public function testFuturePrune() {
         $future = $this->objFromFixture(TestRecordWithFile::class, 'future');
+        // @phpstan-ignore method.notFound
         $fileCount = $future->Files()->count();
 
         $sng = Injector::inst()->create(TestRecordWithFile::class);
 
         $pruneList = $sng->pruneList($this->days_ago, $this->limit);
 
+        // @phpstan-ignore method.notFound
         $filteredList = $pruneList->filter(['ID' => $future->ID]);
 
         $this->assertEquals(0, $filteredList->count(), "Future is not a list record");
@@ -112,6 +114,7 @@ class PruneWithFileTest extends SapphireTest
         // store files IDs expected to be kept
         $expectedToKeepFiles = [];
         foreach($expectedToKeep as $testRecord) {
+            // @phpstan-ignore method.notFound
             $expectedToKeepFiles = array_merge($expectedToKeepFiles, $testRecord->Files()->column('ID'));
         }
         $expectedToKeepCount = $expectedToKeep->count();
@@ -120,6 +123,7 @@ class PruneWithFileTest extends SapphireTest
         // store files IDs expected to be removed
         $expectedToRemoveFiles = [];
         foreach($expectedToRemove as $testRecord) {
+            // @phpstan-ignore method.notFound
             $expectedToRemoveFiles = array_merge($expectedToRemoveFiles, $testRecord->Files()->column('ID'));
         }
         $expectedToRemoveCount = $expectedToRemove->count();

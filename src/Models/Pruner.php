@@ -29,10 +29,9 @@ class Pruner
 
     /**
      * Check if the model provided is a valid model for our purposes, returns an instance of it if so.
-     * @return DataObject
      * @throws InvalidModelException
      */
-    private function isValidModel(string $model)
+    private function isValidModel(string $model): DataObject
     {
         try {
             if (!class_exists($model)) {
@@ -41,7 +40,7 @@ class Pruner
 
             $instance = Injector::inst()->create($model);
             if (!($instance instanceof DataObject)) {
-                throw new \Exception("{$model} is not an instance of DataObject");
+                throw new \Exception("{$model} does not implement PrunerInterface");
             }
 
             if (!self::recordIsPruneable($instance)) {
@@ -103,6 +102,10 @@ class Pruner
                 //attempt to grab a valid instance of the model
                 $instance = $this->isValidModel($model);
 
+                if(!$instance->hasMethod('pruneList')) {
+                    throw new InvalidModelListException("{$model} or extension does not have pruneList method");
+                }
+
                 $list = $instance->pruneList($days_ago, $limit);
 
                 if (!is_object($list)) {
@@ -147,13 +150,13 @@ class Pruner
                             $this->results['total']++;
                             $this->pruneRecord($record);
                             $this->results['pruned']++;
-                        } catch (Exception $e) {
+                        } catch (\Exception $e) {
                             // Logger::log("Pruner::prune failed to prune record {$model}/#{$record->ID}. Type:" . get_class($e), Logger::INFO);
                             Logger::log("Pruner::prune message was: {$e->getMessage()}", Logger::NOTICE);
                         }
                     }
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 Logger::log("Pruner::prune failed on line {$e->getLine()} of file {$e->getFile()} message={$e->getMessage()} type=" . get_class($e), Logger::NOTICE);
             }
         }
@@ -163,8 +166,6 @@ class Pruner
 
     /**
      * Determine whether the passed instance can be pruned
-     * @param DataObject an instance to test whether it implement or an extension implements PrunerInterface
-     * @return bool
      */
     public static function recordIsPruneable(DataObject $instance) : bool {
         $implements = self::implementsPrunerInterface($instance);
@@ -193,17 +194,23 @@ class Pruner
 
     /**
      * Prune the passed record implementing PrunerInterface
-     * @param DataObject implementing PrunerInterface
-     * @throws Exception
+     * @param DataObject $record implementing PrunerInterface or has an extension implementing it
+     * @throws \Exception
      * @return bool
      */
     protected function pruneRecord(DataObject $record) : bool
     {
-        // The record should delete itself in prune(), if it can, along with all associations
-        $record->onBeforePrune();
-        $record->delete();
-        $record->onAfterPrune();
-        return true;
+        if(static::recordIsPruneable($record)) {
+            // The record should delete itself in prune(), if it can, along with all associations
+            // @phpstan-ignore method.notFound
+            $record->onBeforePrune();
+            $record->delete();
+            // @phpstan-ignore method.notFound
+            $record->onAfterPrune();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -211,10 +218,15 @@ class Pruner
      *  content: base64_encoded file content
      *  content-type: the content type of the file
      *  name: the name of the file
-     * @param DataObject implementing PrunerInterface
+     * @param DataObject $record implementing PrunerInterface or has an extension implementing it
      */
-    private function getRecordFiles(DataObject $record)
+    private function getRecordFiles(DataObject $record): ?DataList
     {
-        return $record->pruneFilesList();
+        if(static::recordIsPruneable($record)) {
+            // @phpstan-ignore method.notFound
+            return $record->pruneFilesList();
+        } else {
+            return null;
+        }
     }
 }

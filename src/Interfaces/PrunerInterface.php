@@ -13,8 +13,6 @@ interface PrunerInterface
 
     /**
      * Return a list of records to be pruned
-     * @param int $daysAgo
-     * @return DataList
      */
     public function pruneList(int $days_ago, int $limit) : SS_List;
     public function onBeforePrune() : void;

@@ -59,6 +59,7 @@ class TestRecordWithFile extends DataObject implements TestOnly, PrunerInterface
 
     public function pruneFilesList() : SS_List
     {
+        // @phpstan-ignore method.notFound
         return $this->Files();
     }
 }
