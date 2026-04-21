@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NSWDPC\Pruner;
 
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 
 /**
  * Interface for supporting classes that allow pruning via {@link NSWDPC\Pruner\Pruner}

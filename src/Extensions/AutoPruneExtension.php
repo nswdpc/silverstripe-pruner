@@ -2,7 +2,7 @@
 
 namespace NSWDPC\Pruner;
 
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 
@@ -14,9 +14,9 @@ use SilverStripe\Forms\FieldList;
  * filter
  * @author James
  * @property bool $AutoPrune
- * @extends \SilverStripe\ORM\DataExtension<static>
+ * @extends \SilverStripe\Core\Extension<static>
  */
-class AutoPruneExtension extends DataExtension
+class AutoPruneExtension extends Extension
 {
     /**
      * Database fields
