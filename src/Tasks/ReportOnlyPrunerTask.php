@@ -82,6 +82,7 @@ class ReportOnlyPrunerTask extends BuildTask
         return Command::SUCCESS;
     }
 
+    #[\Override]
     public function getOptions(): array
     {
         return [
