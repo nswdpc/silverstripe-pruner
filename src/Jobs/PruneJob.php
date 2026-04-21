@@ -65,7 +65,7 @@ class PruneJob extends AbstractQueuedJob
         $targets = explode(",", $this->targets);
         $pruner = Pruner::create();
         $results = $pruner->prune($this->days_ago, $this->limit, $targets, $this->report_only);
-        if($results['error']) {
+        if ($results['error']) {
             $this->addMessage("No valid results - " . $results['last_error_msg']);
         } elseif ($this->report_only) {
             $keys_count = count($results['keys']);

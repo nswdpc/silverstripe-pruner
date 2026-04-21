@@ -3,7 +3,6 @@
 namespace NSWDPC\Pruner\Tests;
 
 use NSWDPC\Pruner\Pruner;
-use NSWDPC\Pruner\InvalidModelListException;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Dev\SapphireTest;
 use SilverStripe\Core\Injector\Injector;
