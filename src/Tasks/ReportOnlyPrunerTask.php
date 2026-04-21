@@ -53,8 +53,8 @@ class ReportOnlyPrunerTask extends BuildTask
 
         $pruner = Pruner::create();
         $results = $pruner->prune($age, $limit, $target_models, true);
-        if (!$results) {
-            DB::alteration_message("Task seems to have failed", "error");
+        if ($results['error']) {
+            DB::alteration_message("Task seems to have failed: " . $results['last_error_msg'], "error");
             return;
         } else {
             $output = "\tREPORT\n";

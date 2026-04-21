@@ -59,15 +59,11 @@ class PruneTest extends SapphireTest
             TestOtherRecord::class
         ];
 
-        try {
-            $pruner = Pruner::create();
-            $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
-            // @phpstan-ignore method.alreadyNarrowedType
-            $this->assertFalse(true, "Prune should have thrown an exception");
-        } catch (InvalidModelListException $invalidModelListException) {
-            // error caught here
-            $this->assertNotEmpty($invalidModelListException->getMessage());
-        }
+
+        $pruner = Pruner::create();
+        $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
+        $this->assertTrue($results['error']);
+        $this->assertNotEmpty($results['last_error_msg']);
     }
 
     public function testAncientPrune(): void

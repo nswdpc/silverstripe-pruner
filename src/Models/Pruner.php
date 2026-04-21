@@ -65,7 +65,9 @@ class Pruner
             'keys' => [],
             'file_keys' => [],
             'report_file_keys' => [],
-            'report_only' => $report_only
+            'report_only' => $report_only,
+            'error' => false,
+            'last_error_msg' => ''
         ];
 
         if ($targets === []) {
@@ -154,6 +156,8 @@ class Pruner
                 }
             } catch (\Exception $e) {
                 Logger::log("Pruner::prune failed on line {$e->getLine()} of file {$e->getFile()} message={$e->getMessage()} type=" . $e::class, Logger::NOTICE);
+                $this->results['error'] = true;
+                $this->results['last_error_msg'] = $e->getMessage();
             }
         }
 
