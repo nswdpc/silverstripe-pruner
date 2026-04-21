@@ -3,9 +3,7 @@
 namespace NSWDPC\Pruner\Tests;
 
 use NSWDPC\Pruner\PrunerInterface;
-use SilverStripe\Assets\File;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\SS_List;
 use SilverStripe\Dev\TestOnly;
 
@@ -16,49 +14,41 @@ class TestRecordWithFile extends DataObject implements TestOnly, PrunerInterface
 {
     /**
      * Database fields
-     * @var array
      */
-    private static $db = [
+    private static array $db = [
         'Title' => 'Varchar(255)',
         'ExpectedToBeDeleted' => 'Boolean'
     ];
 
-    /**
-     * @var array
-     */
-    private static $has_many = [
+    private static array $has_many = [
         'Files' => TestFile::class
     ];
 
-    /**
-     * @var array
-     */
-    private static $cascade_deletes = [
+    private static array $cascade_deletes = [
         'Files'
     ];
 
     /**
      * Defines the database table name
-     * @var string
      */
-    private static $table_name = 'PruneTest_TestRecordWithFile';
+    private static string $table_name = 'PruneTest_TestRecordWithFile';
 
-    public function pruneList(int $days_ago, int $limit) : SS_List
+    public function pruneList(int $days_ago, int $limit): SS_List
     {
-        $list = self::get()->filter(['ExpectedToBeDeleted' => 1]);
-        return $list;
+        return self::get()->filter(['ExpectedToBeDeleted' => 1]);
     }
 
-    public function onBeforePrune() : void
-    {
-    }
-
-    public function onAfterPrune() : void
+    public function onBeforePrune(): void
     {
     }
 
-    public function pruneFilesList() : SS_List
+    public function onAfterPrune(): void
     {
+    }
+
+    public function pruneFilesList(): SS_List
+    {
+        // @phpstan-ignore method.notFound
         return $this->Files();
     }
 }

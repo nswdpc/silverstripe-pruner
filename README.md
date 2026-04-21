@@ -6,7 +6,7 @@ It can be applied to any `SilverStripe\ORM\DataObject` record and is useful for 
 
 ## Install
 
-```shell
+```sh
 composer require nswdpc/silverstripe-pruner
 ```
 
@@ -84,16 +84,16 @@ You must implement these methods, even if you are not carrying out any actions p
 
 A task exists to provide quick report showing what would be removed based on the arguments provided:
 
-Report for the targeted models, older than 15 days, limit 50 records removed per model
-```shell
+Report for the targeted models, older than 15 days, limit 50 records removed per model:
+```sh
 ./vendor/bin/sake dev/tasks/ReportOnlyPrunerTask age=15 limit=50 targets=SilverStripe\\UserForms\\Model\\Submission\\SubmittedForm
 ```
 
-Multiple targets can be separated by a comma. If not targets are provided, the configured value of `NSWDPC\Pruner\Pruner.target_models` is used.
+Multiple targets can be separated by a comma. If no targets are provided, the configured value of `NSWDPC\Pruner\Pruner.target_models` is used.
 
 ## Maintainers
 
-+ [dpcdigital@NSWDPC:~$](https://dpc.nsw.gov.au)
++ PD Web Team
 
 ## License
 

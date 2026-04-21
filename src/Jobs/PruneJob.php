@@ -14,23 +14,13 @@ use SilverStripe\Core\Config\Configurable;
  */
 class PruneJob extends AbstractQueuedJob
 {
-
     use Configurable;
 
-    /**
-     * @var int|float
-     */
-    private static $repeat_hours = 1;// hours
+    private static int $repeat_hours = 1;
 
-    /**
-     * @var int|float
-     */
-    private static $default_days_ago = 30;
+    private static int $default_days_ago = 30;
 
-    /**
-     * @var int
-     */
-    private static $default_limit = 50;// 1-hourly job runs should result in 1200 records per target_model per day
+    private static int $default_limit = 50;// 1-hourly job runs should result in 1200 records per target_model per day
 
     /**
      * @param float $days_ago default days in past to prune up to
@@ -42,17 +32,9 @@ class PruneJob extends AbstractQueuedJob
     public function __construct(float $days_ago = 30, int $limit = 50, $targets = "", $report_only = false)
     {
 
-        if (!$days_ago || $days_ago <= 0) {
-            $this->days_ago = self::config()->get('default_days_ago');
-        } else {
-            $this->days_ago = $days_ago;
-        }
+        $this->days_ago = !$days_ago || $days_ago <= 0 ? self::config()->get('default_days_ago') : $days_ago;
 
-        if (!$limit || $limit <= 0) {
-            $this->limit = self::config()->get('default_limit');
-        } else {
-            $this->limit = $limit;
-        }
+        $this->limit = !$limit || $limit <= 0 ? self::config()->get('default_limit') : $limit;
 
         if ($targets == "") {
             $target_models = Config::inst()->get(Pruner::class, 'target_models');
@@ -82,8 +64,9 @@ class PruneJob extends AbstractQueuedJob
     {
         $targets = explode(",", $this->targets);
         $pruner = Pruner::create();
-        if (!$results = $pruner->prune($this->days_ago, $this->limit, $targets, $this->report_only)) {
-            $this->addMessage("No valid results - check logs");
+        $results = $pruner->prune($this->days_ago, $this->limit, $targets, $this->report_only);
+        if ($results['error']) {
+            $this->addMessage("No valid results - " . $results['last_error_msg']);
         } elseif ($this->report_only) {
             $keys_count = count($results['keys']);
             $file_keys_count = count($results['file_keys']);
@@ -91,19 +74,18 @@ class PruneJob extends AbstractQueuedJob
         } else {
             $this->addMessage("Pruned {$results['pruned']}/{$results['total']} records");
         }
+
         $this->isComplete = true;
-        return;
     }
 
     /**
      * Get the next job start DateTime, formatted
      * If there is no repeat_hours value configure the job does not automatically repeat
-     * @return string
      */
-    public function getNextStartDateTime() : string
+    public function getNextStartDateTime(): string
     {
         $hours = self::config()->get('repeat_hours');
-        if(!$hours || $hours <= 0) {
+        if (!$hours || $hours <= 0) {
             return '';
         } else {
             $dt = new \DateTime();
@@ -117,7 +99,7 @@ class PruneJob extends AbstractQueuedJob
      */
     public function afterComplete()
     {
-        if($nextStartDateTime = $this->getNextStartDateTime()) {
+        if ($nextStartDateTime = $this->getNextStartDateTime()) {
             $job = new PruneJob($this->days_ago, $this->limit, $this->targets, $this->report_only);
             singleton(QueuedJobService::class)->queueJob($job, $nextStartDateTime);
         }

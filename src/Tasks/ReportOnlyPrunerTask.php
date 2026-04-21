@@ -11,7 +11,6 @@ use SilverStripe\ORM\DB;
  */
 class ReportOnlyPrunerTask extends BuildTask
 {
-
     /**
      * @inheritdoc
      */
@@ -25,7 +24,7 @@ class ReportOnlyPrunerTask extends BuildTask
     /**
      * @inheritdoc
      */
-    private static $segment = "ReportOnlyPrunerTask";
+    private static string $segment = "ReportOnlyPrunerTask";
 
     /**
      * Run the task
@@ -34,26 +33,28 @@ class ReportOnlyPrunerTask extends BuildTask
     {
         // options
         $age = floatval($request->getVar('age'));
-        if(!$age) {
+        if (!$age) {
             $age = 30;
         }
+
         DB::alteration_message("Using age={$age}", "warning");
         $limit = intval($request->getVar('limit'));
-        if(!$limit) {
+        if (!$limit) {
             $limit = 500;
         }
+
         DB::alteration_message("Using limit={$limit}", "warning");
 
         $targets = $request->getVar('targets');
-        $target_models = array_filter( array_map("trim", explode(",", $targets) ) );
-        if(empty($target_models)) {
+        $target_models = array_filter(array_map(trim(...), explode(",", $targets)));
+        if ($target_models === []) {
             DB::alteration_message("Target models is empty", "warning");
         }
 
         $pruner = Pruner::create();
         $results = $pruner->prune($age, $limit, $target_models, true);
-        if (!$results) {
-            DB::alteration_message("Task seems to have failed", "error");
+        if ($results['error']) {
+            DB::alteration_message("Task seems to have failed: " . $results['last_error_msg'], "error");
             return;
         } else {
             $output = "\tREPORT\n";
@@ -70,6 +71,7 @@ class ReportOnlyPrunerTask extends BuildTask
                     }
                 }
             }
+
             DB::alteration_message($output, "info");
         }
     }

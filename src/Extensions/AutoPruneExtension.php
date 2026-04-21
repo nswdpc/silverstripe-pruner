@@ -13,31 +13,29 @@ use SilverStripe\Forms\FieldList;
  * If you attach this extension to your DataObject, it's up to you to implement the AutoPrune=1
  * filter
  * @author James
+ * @property bool $AutoPrune
+ * @extends \SilverStripe\ORM\DataExtension<static>
  */
 class AutoPruneExtension extends DataExtension
 {
-
     /**
      * Database fields
-     * @var array
      */
-    private static $db = [
+    private static array $db = [
         'AutoPrune' => 'Boolean',
     ];
 
     /**
      * Add default values to database
-     * @var array
      */
-    private static $defaults = [
+    private static array $defaults = [
         'AutoPrune' => 0,
     ];
 
     /**
      * Add default values to database
-     * @var array
      */
-    private static $indexes = [
+    private static array $indexes = [
         'AutoPrune' => true,
     ];
 

@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace NSWDPC\Pruner;
 
 use SilverStripe\Core\Injector\Injector;
 use Psr\Log\LoggerInterface;
-use SilverStripe\Security\Security;
 
 /**
  * Simple Logging class
@@ -12,16 +13,23 @@ use SilverStripe\Security\Security;
  */
 class Logger
 {
-    const DEBUG = 'DEBUG';
-    const INFO = 'INFO';
-    const NOTICE = 'NOTICE';
-    const WARNING = 'WARNING';
-    const ERROR = 'ERROR';
-    const CRITICAL = 'CRITICAL';
-    const ALERT = 'ALERT';
-    const EMERGENCY = 'EMERGENCY';
+    public const DEBUG = 'DEBUG';
 
-    public static function log($message, $level = "DEBUG")
+    public const INFO = 'INFO';
+
+    public const NOTICE = 'NOTICE';
+
+    public const WARNING = 'WARNING';
+
+    public const ERROR = 'ERROR';
+
+    public const CRITICAL = 'CRITICAL';
+
+    public const ALERT = 'ALERT';
+
+    public const EMERGENCY = 'EMERGENCY';
+
+    public static function log(string|\Stringable $message, $level = "DEBUG")
     {
         Injector::inst()->get(LoggerInterface::class)->log($level, $message);
     }

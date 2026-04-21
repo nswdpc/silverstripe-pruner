@@ -3,11 +3,8 @@
 namespace NSWDPC\Pruner\Tests;
 
 use NSWDPC\Pruner\Pruner;
-use NSWDPC\Pruner\InvalidModelListException;
-use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DataList;
 use SilverStripe\Dev\SapphireTest;
-use SilverStripe\Dev\TestOnly;
-use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
 
 /**
@@ -16,7 +13,6 @@ use SilverStripe\Core\Injector\Injector;
  */
 class PruneTest extends SapphireTest
 {
-
     /**
      * @var bool
      */
@@ -37,60 +33,63 @@ class PruneTest extends SapphireTest
      */
     protected $limit = 500;
 
-    /**
-     * @var array
-     */
     protected static $extra_dataobjects = [
         TestRecord::class,
         TestOtherRecord::class
     ];
 
-    public function setUp() : void {
+    public function setUp(): void
+    {
         parent::setUp();
     }
 
-    public function tearDown() : void {
+    public function tearDown(): void
+    {
         parent::tearDown();
     }
 
     /**
      * Test DataList / dataClass mismatch
      */
-    public function testDataClassMatch() {
+    public function testDataClassMatch(): void
+    {
 
         $target_models = [
             TestOtherRecord::class
         ];
 
-        try {
-            $pruner = Pruner::create();
-            $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
-            $this->assertFalse(true, "Prune should have thrown an exception");
-        } catch (InvalidModelListException $e) {
-            // error caught here
-            $this->assertNotEmpty($e->getMessage());
-        }
+
+        $pruner = Pruner::create();
+        $results = $pruner->prune($this->days_ago, $this->limit, $target_models);
+        $this->assertTrue($results['error']);
+        $this->assertNotEmpty($results['last_error_msg']);
     }
 
-    public function testAncientPrune() {
+    public function testAncientPrune(): void
+    {
         $ancient = $this->objFromFixture(TestRecord::class, 'ancient');
 
         $list = Injector::inst()->create(TestRecord::class)
                     ->pruneList($this->days_ago, $this->limit);
 
+        $this->assertInstanceOf(DataList::class, $list);
+
         $this->assertEquals(1, $list->filter(['ID' => $ancient->ID])->count(), "Ancient is a list record");
     }
 
-    public function testFuturePrune() {
+    public function testFuturePrune(): void
+    {
         $future = $this->objFromFixture(TestRecord::class, 'future');
 
         $list = Injector::inst()->create(TestRecord::class)
                     ->pruneList($this->days_ago, $this->limit);
 
+        $this->assertInstanceOf(DataList::class, $list);
+
         $this->assertEquals(0, $list->filter(['ID' => $future->ID])->count(), "Future is not a list record");
     }
 
-    public function testPrune()
+    public function testPrune(): void
     {
 
         $target_models = [
