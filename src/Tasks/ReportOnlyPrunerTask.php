@@ -3,7 +3,10 @@
 namespace NSWDPC\Pruner;
 
 use SilverStripe\Dev\BuildTask;
-use SilverStripe\ORM\DB;
+use SilverStripe\PolyExecution\PolyOutput;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * Run a task to report on which records would be pruned
@@ -14,65 +17,77 @@ class ReportOnlyPrunerTask extends BuildTask
     /**
      * @inheritdoc
      */
-    protected $title = "Tasks to report on which records would be pruned based on arguments provided";
+    protected string $title = "Tasks to report on which records would be pruned based on arguments provided";
 
     /**
      * @inheritdoc
      */
-    protected $description = "This tasks does not delete any records";
+    protected static string $description = "This tasks does not delete any records";
 
     /**
      * @inheritdoc
      */
-    private static string $segment = "ReportOnlyPrunerTask";
+    protected static string $commandName = "ReportOnlyPrunerTask";
 
     /**
      * Run the task
      */
-    public function run($request)
+    protected function execute(InputInterface $input, PolyOutput $output): int
     {
         // options
-        $age = floatval($request->getVar('age'));
+        $age = floatval($input->getOption('age'));
         if (!$age) {
             $age = 30;
         }
 
-        DB::alteration_message("Using age={$age}", "warning");
-        $limit = intval($request->getVar('limit'));
+        $output->writeln("Using age={$age}");
+        $limit = intval($input->getOption('limit'));
         if (!$limit) {
             $limit = 500;
         }
 
-        DB::alteration_message("Using limit={$limit}", "warning");
+        $output->writeln("Using limit={$limit}");
 
-        $targets = $request->getVar('targets');
+        $targets = $input->getOption('targets');
         $target_models = array_filter(array_map(trim(...), explode(",", $targets)));
         if ($target_models === []) {
-            DB::alteration_message("Target models is empty", "warning");
+            $output->writeln("Target models is empty");
         }
 
         $pruner = Pruner::create();
         $results = $pruner->prune($age, $limit, $target_models, true);
         if ($results['error']) {
-            DB::alteration_message("Task seems to have failed: " . $results['last_error_msg'], "error");
-            return;
+            $output->writeln("Task seems to have failed: " . $results['last_error_msg']);
+            return Command::FAILURE;
         } else {
-            $output = "\tREPORT\n";
-            $output .= "\t======\n";
-            $output .= "\tTotal: {$results['pruned']}/{$results['total']} records pruned\n";
-            $output .= "\t======\n";
-            $output .= "\tKEYS\n";
+            $report = "\tREPORT\n";
+            $report .= "\t======\n";
+            $report .= "\tTotal: {$results['pruned']}/{$results['total']} records pruned\n";
+            $report .= "\t======\n";
+            $report .= "\tKEYS\n";
             foreach ($results['keys'] as $key) {
-                $output .= "\n\tRECORD: {$key}\n";
+                $report .= "\n\tRECORD: {$key}\n";
                 if (!empty($results['report_file_keys'][ $key ])) {
-                    $output .= "\t\tFILES: " .  count($results['report_file_keys'][ $key ]) . "\n";
+                    $report .= "\t\tFILES: " .  count($results['report_file_keys'][ $key ]) . "\n";
                     foreach ($results['report_file_keys'][ $key ] as $file_key) {
-                        $output .= "\t\t\t{$file_key}\n";
+                        $report .= "\t\t\t{$file_key}\n";
                     }
                 }
             }
 
-            DB::alteration_message($output, "info");
+            $output->writeln($report);
         }
+
+        return Command::SUCCESS;
+    }
+
+    #[\Override]
+    public function getOptions(): array
+    {
+        return [
+            new InputOption('age', null, InputOption::VALUE_OPTIONAL, 'Older than this age'),
+            new InputOption('targets', null, InputOption::VALUE_OPTIONAL, 'FQCN target class names'),
+            new InputOption('limit', null, InputOption::VALUE_OPTIONAL, 'Limit of records'),
+        ];
     }
 }

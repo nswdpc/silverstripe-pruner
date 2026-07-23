@@ -4,9 +4,9 @@ namespace NSWDPC\Pruner\Tests;
 
 use NSWDPC\Pruner\PrunerInterface;
 use SilverStripe\Dev\TestOnly;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 
 /**
  * A test record with no files

@@ -4,7 +4,7 @@ namespace NSWDPC\Pruner\Tests;
 
 use NSWDPC\Pruner\PrunerInterface;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 use SilverStripe\Dev\TestOnly;
 
 /**
