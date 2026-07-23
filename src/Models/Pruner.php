@@ -5,6 +5,7 @@ namespace NSWDPC\Pruner;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Model\List\ArrayList;
+use SilverStripe\Model\List\SS_List;
 use SilverStripe\Assets\File;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
@@ -221,7 +222,7 @@ class Pruner
      *  name: the name of the file
      * @param DataObject $record implementing PrunerInterface or has an extension implementing it
      */
-    private function getRecordFiles(DataObject $record): ?DataList
+    private function getRecordFiles(DataObject $record): ?SS_List
     {
         if (static::recordIsPruneable($record)) {
             // @phpstan-ignore method.notFound
