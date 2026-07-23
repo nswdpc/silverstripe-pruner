@@ -85,9 +85,9 @@ class ReportOnlyPrunerTask extends BuildTask
     public function getOptions(): array
     {
         return [
-            new InputOption('age', null, InputOption::VALUE_NONE, 'Older than this age'),
-            new InputOption('targets', null, InputOption::VALUE_NONE, 'FQCN target class names'),
-            new InputOption('limit', null, InputOption::VALUE_NONE, 'Limit of records'),
+            new InputOption('age', null, InputOption::VALUE_OPTIONAL, 'Older than this age'),
+            new InputOption('targets', null, InputOption::VALUE_OPTIONAL, 'FQCN target class names'),
+            new InputOption('limit', null, InputOption::VALUE_OPTIONAL, 'Limit of records'),
         ];
     }
 }
